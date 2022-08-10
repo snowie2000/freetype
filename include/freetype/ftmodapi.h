@@ -798,6 +798,10 @@ FT_BEGIN_HEADER
 
   /* */
 
+    // added by snowie2000
+  FT_EXPORT( void )
+  FT_LCDMode_Set( FT_Library library, FT_Int lcd_mode );
+
 
 FT_END_HEADER
 

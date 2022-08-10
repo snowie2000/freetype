@@ -5866,5 +5866,13 @@
       return 0;
   }
 
+// added by snowie2000
+  FT_EXPORT_DEF( void )
+  FT_LCDMode_Set( FT_Library library,  FT_Int lcd_mode)
+  {
+    if (library) {
+        library->lcd_mode = lcd_mode;
+    }
+  }
 
 /* END */

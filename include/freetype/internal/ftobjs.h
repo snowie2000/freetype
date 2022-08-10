@@ -907,13 +907,15 @@ FT_BEGIN_HEADER
     FT_Module          auto_hinter;
 
     FT_DebugHook_Func  debug_hooks[4];
+    
+    FT_Int lcd_mode; // added by snowie, 0=Cleartype style, 1=harmony LCD
 
-#ifdef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
+//#ifdef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
     FT_LcdFiveTapFilter      lcd_weights;      /* filter weights, if any */
     FT_Bitmap_LcdFilterFunc  lcd_filter_func;  /* filtering callback     */
-#else
+//#else
     FT_Vector                lcd_geometry[3];  /* RGB subpixel positions */
-#endif
+//#endif
 
     FT_Int             refcount;
 

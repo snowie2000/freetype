@@ -83,11 +83,11 @@
 
   } TOrigin;
 
-#ifndef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
+//#ifndef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
 
   /* initialize renderer -- init its raster */
   static FT_Error
-  ft_smooth_init( FT_Renderer  render )
+  ft_smooth_init_harmony( FT_Renderer  render )
   {
     FT_Vector*  sub = render->root.library->lcd_geometry;
 
@@ -108,7 +108,7 @@
 
   /* This function writes every third byte in direct rendering mode */
   static void
-  ft_smooth_lcd_spans( int             y,
+  ft_smooth_lcd_spans( int            y,
                        int             count,
                        const FT_Span*  spans,
                        TOrigin*        target )
@@ -125,7 +125,7 @@
 
 
   static FT_Error
-  ft_smooth_raster_lcd( FT_Renderer  render,
+  ft_smooth_raster_lcd_harmony( FT_Renderer render,
                         FT_Outline*  outline,
                         FT_Bitmap*   bitmap )
   {
@@ -192,7 +192,7 @@
 
 
   static FT_Error
-  ft_smooth_raster_lcdv( FT_Renderer  render,
+  ft_smooth_raster_lcdv_harmony( FT_Renderer render,
                          FT_Outline*  outline,
                          FT_Bitmap*   bitmap )
   {
@@ -252,11 +252,11 @@
     return error;
   }
 
-#else   /* FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
+//#else   /* FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
 
   /* initialize renderer -- init its raster */
   static FT_Error
-  ft_smooth_init( FT_Renderer  render )
+  ft_smooth_init_cleartype( FT_Renderer  render )
   {
     /* set up default LCD filtering */
     FT_Library_SetLcdFilter( render->root.library, FT_LCD_FILTER_DEFAULT );
@@ -268,7 +268,7 @@
 
 
   static FT_Error
-  ft_smooth_raster_lcd( FT_Renderer  render,
+  ft_smooth_raster_lcd_cleartype( FT_Renderer render,
                         FT_Outline*  outline,
                         FT_Bitmap*   bitmap )
   {
@@ -300,7 +300,7 @@
 
 
   static FT_Error
-  ft_smooth_raster_lcdv( FT_Renderer  render,
+  ft_smooth_raster_lcdv_cleartype( FT_Renderer render,
                          FT_Outline*  outline,
                          FT_Bitmap*   bitmap )
   {
@@ -330,7 +330,37 @@
     return error;
   }
 
-#endif  /* FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
+//#endif  /* FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
+
+// added by snowie2000
+// dynamic switch between cleartype and harmony lcd
+  static FT_Error
+  ft_smooth_init( FT_Renderer render )
+  {
+    return render->root.library->lcd_mode ? ft_smooth_init_harmony( render )
+                                          : ft_smooth_init_cleartype( render );
+  }
+
+  static FT_Error
+  ft_smooth_raster_lcd( FT_Renderer render,
+                                  FT_Outline* outline,
+                                  FT_Bitmap*  bitmap )
+  {
+    return render->root.library->lcd_mode
+               ? ft_smooth_raster_lcd_harmony( render, outline, bitmap )
+               : ft_smooth_raster_lcd_cleartype( render, outline,
+                                                        bitmap );
+  }
+
+  static FT_Error
+  ft_smooth_raster_lcdv( FT_Renderer render,
+                                   FT_Outline* outline,
+                                   FT_Bitmap*  bitmap )
+  {
+    return render->root.library->lcd_mode
+               ? ft_smooth_raster_lcdv_harmony( render, outline, bitmap )
+               : ft_smooth_raster_lcdv_cleartype( render, outline, bitmap );
+  }
 
 /* Oversampling scale to be used in rendering overlaps */
 #define SCALE  ( 1 << 2 )
@@ -521,6 +551,7 @@
 #ifdef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
 
       /* finally apply filtering */
+      if (slot->library->lcd_mode == 0) // check lcd mode by snowie
       {
         FT_Byte*                 lcd_weights;
         FT_Bitmap_LcdFilterFunc  lcd_filter_func;

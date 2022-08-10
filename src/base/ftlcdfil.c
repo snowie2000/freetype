@@ -23,7 +23,7 @@
 #include <freetype/internal/ftobjs.h>
 
 
-#ifdef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
+//#ifdef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
 
 /* define USE_LEGACY to implement the legacy filter */
 #define  USE_LEGACY
@@ -33,7 +33,7 @@
 
   /* add padding according to filter weights */
   FT_BASE_DEF( void )
-  ft_lcd_padding( FT_BBox*        cbox,
+  ft_lcd_padding_cleartype( FT_BBox*        cbox,
                   FT_GlyphSlot    slot,
                   FT_Render_Mode  mode )
   {
@@ -354,7 +354,7 @@
     return FT_Err_Ok;
   }
 
-
+  /*
   FT_EXPORT_DEF( FT_Error )
   FT_Library_SetLcdGeometry( FT_Library  library,
                              FT_Vector   sub[3] )
@@ -363,13 +363,13 @@
     FT_UNUSED( sub );
 
     return FT_THROW( Unimplemented_Feature );
-  }
+  }*/
 
-#else /* !FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
+//#else /* !FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
 
   /* add padding to accommodate outline shifts */
   FT_BASE_DEF( void )
-  ft_lcd_padding( FT_BBox*        cbox,
+  ft_lcd_padding_harmony( FT_BBox*        cbox,
                   FT_GlyphSlot    slot,
                   FT_Render_Mode  mode )
   {
@@ -391,7 +391,7 @@
     }
   }
 
-
+/*
   FT_EXPORT_DEF( FT_Error )
   FT_Library_SetLcdFilterWeights( FT_Library      library,
                                   unsigned char  *weights )
@@ -413,7 +413,7 @@
     return FT_THROW( Unimplemented_Feature );
   }
 
-
+*/
   /* documentation in ftlcdfil.h */
 
   FT_EXPORT_DEF( FT_Error )
@@ -431,7 +431,16 @@
     return FT_Err_Ok;
   }
 
-#endif /* !FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
+//#endif /* !FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
 
+// Dynamic func call based on lcd_mode
+  FT_BASE_DEF( void )
+    ft_lcd_padding(FT_BBox* cbox,
+        FT_GlyphSlot   slot,
+        FT_Render_Mode mode) {
+    return slot->library->lcd_mode
+                ? ft_lcd_padding_harmony( cbox, slot, mode )
+                : ft_lcd_padding_cleartype( cbox, slot, mode );
+  }
 
 /* END */
